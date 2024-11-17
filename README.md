@@ -1,71 +1,44 @@
-# Seedbot: Unofficial AI Assistant for Seedworld
+# xAI Grok LangChain Chatbot
 
 ## Overview
 
-Seedbot is an AI-powered assistant designed to provide information about Seedworld, a metaverse gaming platform. This unofficial chatbot leverages advanced language models and Retrieval-Augmented Generation (RAG) technology to offer accurate and context-aware responses based on the official Seedworld whitepaper.
-
-## About Seedworld
-
-Seedworld is an immersive AAA metaverse where user-generated content (UGC) gaming meets web3 and real-world economies, built by Seedify. It offers a unique blend of creation, gaming, and blockchain technology, allowing players to craft dream landscapes, engage in epic battles, and earn rewards in the form of $SWORLD tokens. The platform features various game modes, including an exciting upcoming survivor shooter game that combines third-person shooter action with base-raiding and survival mechanics [Seedworld Landing Page](https://seedworld.io/landing).
-
-## 🚀 Try the App
-
-You can test the live app here: [Seedbot AI Assistant](https://seedbot-ai-llm-assistant-ey4zmfte7jzf7cfazmeupm.streamlit.app/)
+A chatbot implementation exploring xAI's recently released Grok API through LangChain integration. The project demonstrates how to build a conversational AI assistant using Grok's capabilities, with Seedworld (a metaverse gaming platform) serving as the knowledge domain for testing and demonstration purposes.
 
 ## Quick Links
 
-- [Seedworld on X (Twitter)](https://x.com/SeedworldMeta)
+- [xAI Grok Documentation](https://docs.x.ai/docs)
 - [Seedworld Whitepaper](https://seedworld.gitbook.io/seedworld-wp)
-- [Seedify on X (Twitter)](https://x.com/SeedifyFund)
-
-## Sample Queries
-
-Here are some example questions you can ask Seedbot:
-
-| | |
-|:-------------------------:|:-------------------------:|
-|<img width="1604" alt="Game Modes" src="figures/gamemodes.png">  Game Modes |  <img width="1604" alt="Features" src="figures/features.png"> Features|
-|<img width="1604" alt="Currency" src="figures/currency.png"> Currency |  <img width="1604" alt="NFTs" src="figures/nfts.png"> NFTs|
-
-## Features
-
-- Provides detailed information on Seedworld's:
-  - Economy and tokenomics
-  - Gameplay mechanics
-  - NFTs and digital assets
-  - Node operations
-  - Land ownership and management
-  - Staking mechanisms
-  - Web3 integration
-  - Real-world economy connections
-- User-friendly chat interface
-- Context-aware responses
-- Based on the latest available Seedworld documentation
+- [Seedworld on X (Twitter)](https://x.com/SeedworldMeta)
 
 ## Technology Stack
 
-Seedbot is built using a modern tech stack designed for efficient natural language processing and information retrieval:
-
-- Backend:
+- **Backend:**
   - Python
-  - LangChain for LLM integration and agents
-  - OpenAI GPT-4o for natural language understanding and generation
-- Retrieval-Augmented Generation (RAG):
-  - Pinecone for storing vector embeddings
-  - LangChain for creating embeddings and retriever functionality
-- User Interface:
-  - Streamlit for creating the web-based chat interface
-- Data Collection:
-  - Beautiful Soup for web scraping Seedworld documentation
+  - LangChain for LLM integration
+  - xAI Grok-Beta model for natural language processing
+- **Chat Management:**
+  - Custom chat history manager for session handling
+  - UUID for user session management
+- **User Interface:**
+  - Streamlit for web interface
+  - Custom CSS for styling
 
-This combination allows for accurate, context-aware responses while maintaining up-to-date information about the Seedworld ecosystem.
+## xAI Grok Integration Experience
+
+The integration of xAI's Grok API proved to be straightforward, requiring minimal code modifications from the OpenAI implementation. Key observations:
+
+- **Easy Integration:** LangChain's support for xAI models made the switch from OpenAI simple and efficient
+- **Function Calling:** Supports function calling capabilities similar to OpenAI
+- **Current Limitations:**
+  - Real-time news/events access is currently limited to Grok's chatbot on X
+  - Image generation not yet available via API
+  - Some advanced features still in development
 
 ## Usage
 
-To run the Seedbot assistant:
+To run the chatbot:
 `streamlit run app.py`
-
 
 ## Disclaimer
 
-Seedbot is an unofficial project and is not directly affiliated with Seedworld or Seedify. While we strive for accuracy, the information provided by Seedbot should not be considered as official statements from Seedworld. Always refer to the official Seedworld documentation for the most up-to-date and accurate information.
+This is an experimental project exploring the xAI Grok API integration. While the chatbot uses Seedworld's documentation for demonstration purposes, it is not directly affiliated with Seedworld or Seedify. Always refer to the official Seedworld documentation for the most up-to-date and accurate information.

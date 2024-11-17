@@ -4,6 +4,7 @@ from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from tools import Tools  
 from chat_history import chat_history_manager
+from langchain_xai import ChatXAI
 
 class Agent:
     def __init__(self, prompt_text, agent_type, Temperature, llm_model):
@@ -13,7 +14,7 @@ class Agent:
             ("user", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
-        self.llm = ChatOpenAI(model_name=llm_model, temperature=Temperature, streaming=False)
+        self.llm = ChatXAI(model_name=llm_model, temperature=Temperature, streaming=False)
 
         self.tools = Tools.setup_tools() 
         print(agent_type, " : ", self.tools )

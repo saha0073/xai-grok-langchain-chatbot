@@ -1,98 +1,99 @@
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_openai import ChatOpenAI
 from chat_history import chat_history_manager
-from agent import Agent
-from prompts import PROMPTS_VERSION_ONE, PROMPTS_VERSION_TWO
-from css.custom_css import inject_custom_css
 from dotenv import load_dotenv
 import streamlit as st
 import uuid
+from css.custom_css import inject_custom_css
+from langchain_xai import ChatXAI
+from prompts import PROMPTS_VERSION_ONE, PROMPTS_VERSION_TWO
+
 
 load_dotenv()
 
-# Inject custom CSS
+
 inject_custom_css()
 
-selected_prompt = PROMPTS_VERSION_ONE
+# Initialize session ID if not present
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
 
-# Fetch the temperature if not already fetched
-if 'temperature' not in st.session_state:
-    st.session_state.temperature = 0.7
-
-# Fetch the model name if not already fetched
-if 'llm_model' not in st.session_state:
-    st.session_state.llm_model = "gpt-4o"
-
-# Initialize the Agent if not already initialized
-if 'agent' not in st.session_state:
-    st.session_state.agent = Agent(prompt_text=selected_prompt, agent_type="strategist", Temperature=st.session_state.temperature, llm_model=st.session_state.llm_model)
-    st.session_state.selected_prompt = selected_prompt  
-
-# Sidebar for agent selection and displaying configuration
-st.sidebar.title("🌿 Seedbot Settings")
-
-# Add brief description and links in the sidebar
-st.sidebar.markdown("Seedworld: Immersive AAA metaverse where UGC gaming meets web3 and real-world economies, built by Seedify")
-st.sidebar.markdown("[X (Twitter)](https://x.com/SeedworldMeta)")
-st.sidebar.markdown("[Whitepaper](https://seedworld.gitbook.io/seedworld-wp)")
-
-# Display agent configuration in sidebar
-st.sidebar.subheader("🤖 Assistant Configuration")
-#first_sentence = ' '.join(st.session_state.selected_prompt.split('. ')[:1])
-first_sentence = f"""I am Seedbot, your unofficial Seedworld support assistant. I can answer any questions you have about Seedworld’s economy, gameplay, NFTs, nodes, tokens, land ownership, staking, and more, using detailed information from the Seedworld whitepaper."""
-st.sidebar.write(f"📝 About me: {first_sentence}")
-st.sidebar.write(f"🌡️ Temperature: {st.session_state.temperature}")
-st.sidebar.write(f"🧠 Model: {st.session_state.llm_model}")
-st.sidebar.write("⚠️ Disclaimer: Responses may not be 100% accurate.")
-
-
-# Initialize agent_with_chat_history in session state if not already present
-if 'agent_with_chat_history' not in st.session_state:
-    st.session_state.agent_with_chat_history = st.session_state.agent.get_agent_with_history()
-
-# Initialize conversation history in session state if not already present
-if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "Welcome, gamer! Curious about Seedworld? Ask me anything!"}]
-
-st.title("🎮 Seedbot")
-st.markdown("🌐 unofficial Seedworld support assistant built on the top of Seedworld's whitepaper, may not be 100% accurate. Explore Seedworld, one question at a time 🌱")
-
-# Display each message in the chat
-for message in st.session_state["messages"]:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# Input area for user to type their message
-prompt = st.chat_input("Plant your idea here...")
-
-# Determine the agent descriptor
-agent_descriptor = "🌱 Seedbot"
-#st.markdown(f"<div class='agent-descriptor'>Chatting with {agent_descriptor}</div>", unsafe_allow_html=True)
-
-if prompt:
-    # Ensure session_id is initialized in session state
-    if "session_id" not in st.session_state:
-        st.session_state["session_id"] = str(uuid.uuid4())
-
-    # Append user message to the conversation history
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
-
-    response = st.session_state.agent_with_chat_history.invoke(
-        {"input": prompt},
-        config={"configurable": {"session_id": st.session_state["session_id"]}}
+# Initialize chat model
+if "chat_model" not in st.session_state:
+    st.session_state.chat_model = ChatXAI(
+        temperature=0.7,
+        model_name="grok-beta"     #"gpt-3.5-turbo"
     )
-    agent_name = "🌱 Seedbot"
 
-    response_text = response.get('output')
+# Get chat history for current session
+chat_history = chat_history_manager.get_history_by_session_id(st.session_state.session_id)
 
-    print(chat_history_manager.chat_histories)
+# Initialize system message if history is empty
+if not chat_history.messages:
+    system_msg = PROMPTS_VERSION_ONE
+    chat_history.add_message(SystemMessage(content=system_msg))
 
-    # Append agent's response to the conversation history
-    st.session_state.messages.append({"role": "assistant", "content": response_text})
+# Page config
+st.title("🎮 Seedbot")
+st.markdown("🌐 Unofficial Seedworld support assistant built on the top of Seedworld's whitepaper, may not be 100% accurate. Explore Seedworld, one question at a time 🌱")
+
+# Display chat messages (excluding system message)
+for message in chat_history.messages[1:]:  # Skip system message
+    role = "assistant" if isinstance(message, AIMessage) else "user"
+    with st.chat_message(role):
+        if role == "assistant":
+            st.markdown(f"🌱 Seedbot: {message.content}")
+        else:
+            st.markdown(message.content)
+
+# Chat input
+if prompt := st.chat_input("Plant your idea here..."):
+    # Add user message
+    user_message = HumanMessage(content=prompt)
+    chat_history.add_message(user_message)
+
+    # Display user message
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Get AI response
     with st.chat_message("assistant"):
-        st.markdown(f"🌱 Seedbot: {response_text}")
+        with st.spinner("Thinking..."):
+            response = st.session_state.chat_model.invoke(
+                chat_history.messages
+            )
+            st.markdown(f"🌱 Seedbot: {response.content}")
+            chat_history.add_message(response)
+            print(chat_history_manager.chat_histories)
 
-# Add a footer
+# Sidebar settings
+with st.sidebar:
+    st.title("🌿 Seedbot Settings")
+    
+    # Add brief description and links
+    st.markdown("Seedworld: Immersive AAA metaverse where UGC gaming meets web3 and real-world economies, built by Seedify")
+    st.markdown("[X (Twitter)](https://x.com/SeedworldMeta)")
+    st.markdown("[Whitepaper](https://seedworld.gitbook.io/seedworld-wp)")
+    
+    # Display agent configuration
+    st.subheader("🤖 Assistant Configuration")
+    first_sentence = """I am Seedbot, your unofficial Seedworld support assistant. I can answer any questions you have about Seedworld's economy, gameplay, NFTs, nodes, tokens, land ownership, staking, and more, using detailed information from the Seedworld whitepaper."""
+    st.write(f"📝 About me: {first_sentence}")
+    st.write(f"🌡️ Temperature: {st.session_state.chat_model.temperature}")
+    st.write(f"🧠 Model: {st.session_state.chat_model.model_name}")
+    st.write("⚠️ Disclaimer: Responses may not be 100% accurate.")
+    
+    # Temperature control
+    temperature = st.slider("Temperature", 0.0, 1.0, 0.7)
+    if temperature != st.session_state.chat_model.temperature:
+        st.session_state.chat_model.temperature = temperature
+    
+    # Clear chat button
+    if st.button("Clear Chat History"):
+        chat_history.clear()
+        system_msg = PROMPTS_VERSION_ONE
+        chat_history.add_message(SystemMessage(content=system_msg))
+        st.rerun()
+
+# Add footer
 st.markdown("---")
-#st.markdown("🌐 Exploring the Seedworld metaverse, one question at a time.")
-#st.markdown("⚠️ Disclaimer: This is an unofficial Seedworld assistant built on Seedworld GitBook content. Responses may not always be accurate.")
-
