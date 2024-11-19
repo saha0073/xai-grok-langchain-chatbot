@@ -7,8 +7,6 @@ A chatbot implementation exploring xAI's recently released Grok API through Lang
 ## Quick Links
 
 - [xAI Grok Documentation](https://docs.x.ai/docs)
-- [Seedworld Whitepaper](https://seedworld.gitbook.io/seedworld-wp)
-- [Seedworld on X (Twitter)](https://x.com/SeedworldMeta)
 
 ## Technology Stack
 
